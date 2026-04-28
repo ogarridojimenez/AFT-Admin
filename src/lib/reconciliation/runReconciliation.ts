@@ -1,5 +1,5 @@
 import { createSupabaseAdmin } from '@/lib/supabase/admin';
-import { ASSET_ID_REGEX, sanitizeAssetId } from '@aft/shared';
+import { ASSET_ID_REGEX, sanitizeAssetId } from '@/lib/shared';
 
 export type ScanPayload = { asset_id: string; scanned_at?: string; notes?: string };
 

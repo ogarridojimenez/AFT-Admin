@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { excelRowSchema, type ExcelRowInput } from '@aft/shared';
+import { excelRowSchema, type ExcelRowInput } from '@/lib/shared';
 
 export type UploadRowError = { row: number; message: string; raw: Record<string, unknown> };
 

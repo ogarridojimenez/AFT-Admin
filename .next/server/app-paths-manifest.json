@@ -1,11 +1,20 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/areas/route": "app/api/areas/route.js",
-  "/api/inventories/route": "app/api/inventories/route.js",
+  "/api/assets/route": "app/api/assets/route.js",
   "/api/inventories/[id]/reconciliation/route": "app/api/inventories/[id]/reconciliation/route.js",
-  "/(app)/qr/page": "app/(app)/qr/page.js",
+  "/api/inventories/route": "app/api/inventories/route.js",
+  "/login/page": "app/login/page.js",
+  "/api/sync/inventory/route": "app/api/sync/inventory/route.js",
+  "/api/upload/route": "app/api/upload/route.js",
+  "/api/inventories/[id]/report/route": "app/api/inventories/[id]/report/route.js",
+  "/api/qr/route": "app/api/qr/route.js",
   "/(app)/areas/page": "app/(app)/areas/page.js",
-  "/(app)/inventories/page": "app/(app)/inventories/page.js",
+  "/(app)/assets/page": "app/(app)/assets/page.js",
   "/(app)/inventories/[id]/page": "app/(app)/inventories/[id]/page.js",
-  "/(app)/page": "app/(app)/page.js",
-  "/(app)/inventories/new/page": "app/(app)/inventories/new/page.js"
+  "/(app)/inventories/new/page": "app/(app)/inventories/new/page.js",
+  "/(app)/inventories/page": "app/(app)/inventories/page.js",
+  "/(app)/upload/page": "app/(app)/upload/page.js",
+  "/(app)/qr/page": "app/(app)/qr/page.js",
+  "/(app)/page": "app/(app)/page.js"
 }
