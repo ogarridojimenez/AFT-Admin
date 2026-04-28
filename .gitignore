@@ -1,1 +1,3 @@
 ﻿.env.local
+.vercel
+.next

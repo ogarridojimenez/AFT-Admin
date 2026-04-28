@@ -54,7 +54,7 @@ export async function GET(
       assetLocation: item.assets?.location ?? null,
     }));
 
-    const area = inventory.areas as { name: string; code: string } | null;
+    const area = (inventory.areas as unknown as { name: string; code: string } | null) ?? null;
 
     const expected = flatItems.length;
     const found = flatItems.filter((i: any) => (i.quantityFound ?? 0) > 0).length;

@@ -51,7 +51,7 @@ export async function GET(
       return NextResponse.json({ error: reconError.message }, { status: 500 });
     }
 
-    const area = inventory.areas as { name: string; code: string } | null;
+    const area = (inventory.areas as unknown as { name: string; code: string } | null) ?? null;
     let flatItems = (items ?? []).map((item: any) => ({
       assetTag: item.assets?.asset_id ?? null,
       assetName: item.assets?.name ?? null,
