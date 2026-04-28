@@ -1,0 +1,11 @@
+{
+  "/api/areas/route": "app/api/areas/route.js",
+  "/api/inventories/route": "app/api/inventories/route.js",
+  "/api/inventories/[id]/reconciliation/route": "app/api/inventories/[id]/reconciliation/route.js",
+  "/(app)/qr/page": "app/(app)/qr/page.js",
+  "/(app)/areas/page": "app/(app)/areas/page.js",
+  "/(app)/inventories/page": "app/(app)/inventories/page.js",
+  "/(app)/inventories/[id]/page": "app/(app)/inventories/[id]/page.js",
+  "/(app)/page": "app/(app)/page.js",
+  "/(app)/inventories/new/page": "app/(app)/inventories/new/page.js"
+}
