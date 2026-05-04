@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth/guard';
 import { runReconciliation, type ScanPayload } from '@/lib/reconciliation/runReconciliation';
 import { z } from 'zod';
 
@@ -18,8 +17,8 @@ const bodySchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const { error: authError } = await requireAuth(request);
-    if (authError) return authError;
+    // Sincronización sin autenticación (v1 - temporal)
+    // TODO: Agregar autenticación en producción
 
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
