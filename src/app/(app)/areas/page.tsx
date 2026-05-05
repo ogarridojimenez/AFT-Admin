@@ -27,6 +27,9 @@ function AreasContent() {
   const [form, setForm] = useState({ name: '', code: '' });
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadArea, setUploadArea] = useState<Area | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const fetchAreas = async () => {
     setLoading(true);
@@ -116,6 +119,69 @@ function AreasContent() {
     }
   };
 
+  const openUploadModal = (area: Area) => {
+    setUploadArea(area);
+    setShowUploadModal(true);
+  };
+
+  const handleUploadAssets = async (file: File, replace: boolean) => {
+    if (!uploadArea) return;
+    
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('areaCode', uploadArea.code);
+      formData.append('replace', String(replace));
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        addToast(data.error, 'error');
+      } else {
+        addToast(`Se procesaron ${data.processed} activos`, 'success');
+        setShowUploadModal(false);
+      }
+    } catch (e) {
+      addToast('Error al subir activos', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleForceDelete = async (areaId: string) => {
+    const area = areas.find(a => a.id === areaId);
+    const confirmed = window.confirm(
+      `¿ELIMINAR DEFINITIVAMENTE el área "${area?.name}" y TODOS sus activos? Esta acción no se puede deshacer.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(areaId);
+    try {
+      const res = await fetch(`/api/areas?areaId=${areaId}&force=true`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      
+      if (data.error) {
+        addToast(data.error, 'error');
+      } else {
+        addToast('Área y activos eliminados', 'success');
+        fetchAreas();
+      }
+    } catch (e) {
+      addToast('Error al eliminar área', 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -178,7 +244,7 @@ function AreasContent() {
                   {area.is_active ? 'Activa' : 'Inactiva'}
                 </span>
               </div>
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   onClick={() => openEditModal(area)}
                   className="rounded px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
@@ -186,11 +252,25 @@ function AreasContent() {
                   Editar
                 </button>
                 <button
+                  onClick={() => openUploadModal(area)}
+                  className="rounded px-2 py-1 text-xs text-green-600 hover:bg-green-50"
+                >
+                  Actualizar activos
+                </button>
+                <button
                   onClick={() => handleDelete(area.id)}
                   disabled={deletingId === area.id}
                   className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
                 >
                   {deletingId === area.id ? '...' : 'Eliminar'}
+                </button>
+                <button
+                  onClick={() => handleForceDelete(area.id)}
+                  disabled={deletingId === area.id}
+                  className="rounded px-2 py-1 text-xs text-red-700 hover:bg-red-100 disabled:opacity-50"
+                  title="Eliminar área y todos sus activos"
+                >
+                  {deletingId === area.id ? '...' : 'Eliminar todo'}
                 </button>
               </div>
             </div>
@@ -243,6 +323,74 @@ function AreasContent() {
                 className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
               >
                 {saving ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+</div>
+        )}
+
+      {/* Upload Modal */}
+      {showUploadModal && uploadArea && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-900">
+              Actualizar activos - {uploadArea.name} ({uploadArea.code})
+            </h3>
+            
+            <div className="mt-4 space-y-4">
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                <p className="font-medium">Importante:</p>
+                <p>Sube un archivo Excel con los activos. Selecciona si deseas:</p>
+                <ul className="mt-2 list-disc pl-4">
+                  <li><strong>Agregar:</strong> Mantiene los actuales y agrega los nuevos</li>
+                  <li><strong>Reemplazar:</strong> Elimina todos los actuales y agrega los nuevos</li>
+                </ul>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Archivo Excel</label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  id="assetFile"
+                  className="mt-1 block w-full text-sm text-slate-500"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleUploadAssets(file, false);
+                    }
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700">O reemplazar todos los activos</label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  id="assetFileReplace"
+                  className="mt-1 block w-full text-sm text-slate-500"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (confirm('¿Estás seguro? Se eliminarán todos los activos actuales del área.')) {
+                        handleUploadAssets(file, true);
+                      }
+                    }
+                  }}
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Al seleccionar este campo se eliminarán todos los activos actuales y se agregarán los del Excel
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cancelar
               </button>
             </div>
           </div>

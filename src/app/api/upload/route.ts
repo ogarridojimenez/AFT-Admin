@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const file = form.get('file');
     const areaCode = String(form.get('areaCode') ?? '').trim();
+    const replace = form.get('replace') === 'true';
 
     if (!(file instanceof Blob)) {
       return NextResponse.json({ error: 'Archivo requerido' }, { status: 400 });
@@ -47,6 +48,18 @@ export async function POST(request: Request) {
         { error: `Área no encontrada o inactiva para código: ${areaCode}` },
         { status: 400 }
       );
+    }
+
+    // Si replace=true, eliminar activos actuales del área
+    if (replace) {
+      const { error: deleteError } = await supabase
+        .from('assets')
+        .delete()
+        .eq('area_id', area.id);
+      
+      if (deleteError) {
+        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      }
     }
 
     let processed = 0;

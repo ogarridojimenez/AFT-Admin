@@ -105,6 +105,7 @@ export async function DELETE(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const areaId = searchParams.get('areaId');
+    const force = searchParams.get('force') === 'true';
 
     if (!areaId) {
       return NextResponse.json({ error: 'areaId requerido' }, { status: 400 });
@@ -112,18 +113,32 @@ export async function DELETE(request: Request) {
 
     const supabase = createSupabaseAdmin();
 
-    // Verificar si hay activos en esta área
-    const { data: assets } = await supabase
-      .from('assets')
-      .select('id')
-      .eq('area_id', areaId)
-      .limit(1);
+    // Verificar si hay activos en esta área (solo si no es force)
+    if (!force) {
+      const { data: assets } = await supabase
+        .from('assets')
+        .select('id')
+        .eq('area_id', areaId)
+        .limit(1);
 
-    if (assets && assets.length > 0) {
-      return NextResponse.json({ error: 'No se puede eliminar: hay activos registrados en esta área' }, { status: 400 });
+      if (assets && assets.length > 0) {
+        return NextResponse.json({ error: 'No se puede eliminar: hay activos registrados en esta área. Usa "Eliminar todo" para borrar también los activos.' }, { status: 400 });
+      }
     }
 
-    // Eliminar realmente
+    // Si es force, eliminar activos primero
+    if (force) {
+      const { error: deleteAssetsError } = await supabase
+        .from('assets')
+        .delete()
+        .eq('area_id', areaId);
+      
+      if (deleteAssetsError) {
+        return NextResponse.json({ error: deleteAssetsError.message }, { status: 500 });
+      }
+    }
+
+    // Eliminar área
     const { error } = await supabase
       .from('areas')
       .delete()
