@@ -93,7 +93,7 @@ function AreasContent() {
 
   const handleDelete = async (areaId: string) => {
     const area = areas.find(a => a.id === areaId);
-    if (!confirm(`¿Desactivar área "${area?.name}"?`)) return;
+    if (!confirm(`¿Eliminar área "${area?.name}"? Esta acción no se puede deshacer.`)) return;
     
     setDeletingId(areaId);
     try {
@@ -106,7 +106,7 @@ function AreasContent() {
       if (data.error) {
         addToast(data.error, 'error');
       } else {
-        addToast('Área desactivada', 'success');
+        addToast('Área eliminada', 'success');
         fetchAreas();
       }
     } catch (e) {
@@ -185,15 +185,13 @@ function AreasContent() {
                 >
                   Editar
                 </button>
-                {area.is_active && (
-                  <button
-                    onClick={() => handleDelete(area.id)}
-                    disabled={deletingId === area.id}
-                    className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {deletingId === area.id ? '...' : 'Desactivar'}
-                  </button>
-                )}
+                <button
+                  onClick={() => handleDelete(area.id)}
+                  disabled={deletingId === area.id}
+                  className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+                >
+                  {deletingId === area.id ? '...' : 'Eliminar'}
+                </button>
               </div>
             </div>
           ))}

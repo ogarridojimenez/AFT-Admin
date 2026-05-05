@@ -111,9 +111,22 @@ export async function DELETE(request: Request) {
     }
 
     const supabase = createSupabaseAdmin();
+
+    // Verificar si hay activos en esta área
+    const { data: assets } = await supabase
+      .from('assets')
+      .select('id')
+      .eq('area_id', areaId)
+      .limit(1);
+
+    if (assets && assets.length > 0) {
+      return NextResponse.json({ error: 'No se puede eliminar: hay activos registrados en esta área' }, { status: 400 });
+    }
+
+    // Eliminar realmente
     const { error } = await supabase
       .from('areas')
-      .update({ is_active: false })
+      .delete()
       .eq('id', areaId);
 
     if (error) {
