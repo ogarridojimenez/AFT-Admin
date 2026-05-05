@@ -99,6 +99,28 @@ function InventoriesContent() {
     }
   };
 
+  const handleDelete = async (inventoryId: string) => {
+    const confirmed = window.confirm('¿Estás seguro de eliminar este inventario? Se eliminarán todos los datos relacionados.');
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/inventories/${inventoryId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        addToast('Inventario eliminado', 'success');
+        fetchData();
+      } else {
+        addToast(data.error || 'Error al eliminar', 'error');
+      }
+    } catch (e) {
+      addToast('Error al eliminar inventario', 'error');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -194,6 +216,7 @@ function InventoriesContent() {
                   </th>
                   <th className="px-4 py-3 font-medium">ID</th>
                   <th className="px-4 py-3 font-medium">Historial</th>
+                  <th className="px-4 py-3 font-medium">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -219,6 +242,14 @@ function InventoriesContent() {
                           className="rounded px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
                         >
                           Ver historial
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleDelete(inv.id)}
+                          className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                        >
+                          Eliminar
                         </button>
                       </td>
                     </tr>
