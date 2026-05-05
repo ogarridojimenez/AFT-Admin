@@ -176,7 +176,9 @@ export default function InventoryDetailPage() {
           <ul className="mt-2 space-y-1">
             {surplusFromRecon.map((s: any, i: number) => (
               <li key={i} className="text-xs text-amber-800">
-                <span className="font-mono">{s.asset_id}</span> — {s.notes}
+                <span className="font-mono">{s.asset_id}</span>
+                {s.name && <span className="text-amber-700"> — {s.name}</span>}
+                <span className="text-amber-600"> ({s.scanned_at ? new Date(s.scanned_at).toLocaleString('es-CU') : ''})</span>
               </li>
             ))}
           </ul>

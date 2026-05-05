@@ -41,7 +41,7 @@ export async function runReconciliation(
 
   const list = expectedAssets ?? [];
   const foundByAssetPk = new Set<string>();
-  const surplusAssets: Array<{ asset_id: string; scanned_at: string; notes?: string }> = [];
+  const surplusAssetIds = new Set<string>();
 
   for (const result of deviceResults) {
     const raw = sanitizeAssetId(result.asset_id);
@@ -51,11 +51,28 @@ export async function runReconciliation(
     if (asset) {
       foundByAssetPk.add(asset.id);
     } else {
-      surplusAssets.push({
-        asset_id: raw,
-        scanned_at: result.scanned_at ?? new Date().toISOString(),
-        notes: result.notes ?? 'Activo encontrado fuera del listado del area',
-      });
+      surplusAssetIds.add(raw);
+    }
+  }
+
+  const surplusAssets: Array<{ asset_id: string; name?: string; scanned_at: string; notes?: string }> = [];
+  if (surplusAssetIds.size > 0) {
+    const { data: surplusAssetData, error: surplusAssetError } = await supabase
+      .from('assets')
+      .select('asset_id, name')
+      .in('asset_id', Array.from(surplusAssetIds));
+
+    if (!surplusAssetError && surplusAssetData) {
+      const assetNameMap = new Map(surplusAssetData.map((a) => [a.asset_id, a.name]));
+      for (const assetId of surplusAssetIds) {
+        const deviceResult = deviceResults.find((r) => sanitizeAssetId(r.asset_id) === assetId);
+        surplusAssets.push({
+          asset_id: assetId,
+          name: assetNameMap.get(assetId) ?? undefined,
+          scanned_at: deviceResult?.scanned_at ?? new Date().toISOString(),
+          notes: deviceResult?.notes ?? 'Activo encontrado fuera del listado del area',
+        });
+      }
     }
   }
 
