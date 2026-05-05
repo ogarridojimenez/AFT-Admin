@@ -29,8 +29,8 @@ type InventoryItem = {
 
 type Reconciliation = {
   id: string;
-  missingAssets: any[];
-  surplusAssets: any[];
+  missing_assets: any[];
+  surplus_assets: any[];
   summary: any;
   status: string;
   notes: string | null;
@@ -99,8 +99,8 @@ export default function InventoryDetailPage() {
     return true;
   });
 
-  const missingFromRecon = reconciliation?.missingAssets ?? [];
-  const surplusFromRecon = reconciliation?.surplusAssets ?? [];
+  const missingFromRecon = reconciliation?.missing_assets ?? [];
+  const surplusFromRecon = reconciliation?.surplus_assets ?? [];
 
   return (
     <div className="space-y-6">
